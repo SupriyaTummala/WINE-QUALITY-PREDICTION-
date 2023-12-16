@@ -1,0 +1,94 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+data=pd.read_csv("winequality-red.csv")
+data.head()
+data.rename(columns={'fixed acidity': 'fixed_acidity', 'volatile acidity': 'volatile_acidity',
+                   'citric acid':'citric_acid','residual sugar':'residual_sugar',
+                   'free sulfur dioxide':'free_sulfur_dioxide','total sulfur dioxide':'total_sulfur_dioxide'}, inplace=True)
+data.info()
+data.isnull().sum()
+df = data.copy() 
+print("Quality points:", data["quality"].unique())
+print(data["quality"].value_counts())
+df.describe()
+df.rename(columns = {"fixed acidity": "fixed_acidity", "volatile acidity": "volatile_acidity",
+                    "citric acid": "citric_acid", "residual sugar": "residual_sugar",
+                    "chlorides": "chlorides", "free sulfur dioxide": "free_sulfur_dioxide",
+                    "total sulfur dioxide": "total_sulfur_dioxide"}, inplace = True)
+numerical_cols = data.select_dtypes(include='number').columns.tolist()
+
+fig, axs = plt.subplots(nrows=4, ncols=3, figsize=(15, 20))
+
+for col, ax in zip(numerical_cols, axs.flat): 
+    sns.histplot(data=data, x=col, kde=True, ax=ax, color="#A163CF")
+    ax.set(title=col)
+    if ax.get_subplotspec().is_last_row():
+        ax.set(xlabel=col)
+
+plt.tight_layout() 
+plt.show()
+fig, axes = plt.subplots(2, figsize = (15, 10)) 
+axes = axes.flatten()
+
+sns.scatterplot(ax = axes[0],
+                x = "free_sulfur_dioxide",
+                y = "alcohol",
+                hue = "quality",
+                palette = "magma",
+                data = df).set(title = "Relationship between 'free_sulfur_dioxide' and 'alcohol'");
+
+
+sns.scatterplot(ax = axes[1],
+                x = "total_sulfur_dioxide",
+                y = "alcohol",
+                hue = "quality",
+                palette = "magma",
+                data = df).set(title = "Relationship between 'total_sulfur_dioxide' and 'alcohol'");
+sns.scatterplot(x = "residual_sugar",
+                y = "pH",
+                hue = "quality",
+                data = df).set(title = "Relationship between 'residual_sugar' and 'pH'");
+sns.scatterplot(x = "alcohol",
+                y = "pH",
+                hue = "quality",
+                palette = "magma",
+                data = df).set(title = "Relationship between 'alcohol' and 'pH'");
+sns.scatterplot(x = "density",
+                y = "fixed_acidity",
+                hue = "quality",
+                palette = "magma",
+                data = df).set(title = "Relationship between 'density' and 'fixed_acidity'");
+fig, axes = plt.subplots(2, figsize=(15, 10))
+axes = axes.flatten()
+
+sns.scatterplot(ax = axes[0],
+                x = "fixed_acidity",
+                y = "pH",
+                hue = "quality",
+                palette = "magma",
+                data = df).set(title = "Relationship between 'fixed_acidity' and 'pH'");
+
+sns.scatterplot(ax = axes[1],
+                x = "volatile_acidity",
+                y = "pH",
+                hue = "quality",
+                palette = "magma",
+                data = df).set(title = "Relationship between 'volatile_acidity' and 'pH'");
+plt.figure(figsize = [20, 10], facecolor = 'white')
+sns.heatmap(df.corr(), annot = True, linewidths = 2, cmap = "magma");
+from tabulate import tabulate
+
+model_accuracies = {
+    'KNN': 0.7675,
+    'Logistic Regression': 0.7275,
+    'Decision Tree': 0.6875,
+    'Random Forest': 0.74,
+    'Gradient Boosting Machine': 0.7975,
+    'Light Gradient Boosting Machine(LGBM)': 0.815
+}
+
+table = [[model, accuracy] for model, accuracy in model_accuracies.items()]
+
+print(tabulate(table, headers=['Model', 'Accuracy'], tablefmt='fancy_grid'))
